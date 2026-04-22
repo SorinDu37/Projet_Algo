@@ -1,8 +1,8 @@
 package dblp;
 
+import dblp.core.Tache;
 import dblp.taches.Tache1;
 import dblp.taches.Tache2;
-import dblp.core.Tache;
 
 public class Main {
     public static void main(String[] args) {

@@ -86,7 +86,7 @@ public class Tache1 extends Tache {
         }
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(nomFichierSortie))) {
-            writer.println("TailleCommunauté,NombreDeCommunautés");
+            writer.println("TailleCommunaute,NombreDeCommunautes");
             for (Map.Entry<Integer, Integer> entry : histogramme.entrySet()) {
                 writer.println(entry.getKey() + "," + entry.getValue());
             }

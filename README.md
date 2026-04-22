@@ -40,6 +40,12 @@ Place the following files in the `lib/` directory:
 * `dblp.xml.gz` (Official DBLP dataset)
 * `dblp.dtd` (XML Structure definition)
 
+If done via github, run :
+```bash
+git lfs install
+git lfs pull
+```
+
 ### 2. Compilation
 Compile all packages from the project root using the following command:
 ```bash
@@ -53,7 +59,7 @@ java -cp bin -Xmx8G dblp.Main
 ```
 ## Output Results
 
-All results are exported to the "output/" directory:
+All results are exported to the `output/` directory:
 * **tache1_histogram.csv**: Distribution of undirected community sizes.
 * **tache2_histogram.csv**: Distribution of SCC sizes.
 * **tache2_top10.txt**: Detailed breakdown of the 10 largest directed communities, including member names and diameters.
