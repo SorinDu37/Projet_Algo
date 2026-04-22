@@ -9,13 +9,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * TÂCHE 2 : Communautés orientées dans DBLP
- * Utilise un graphe orienté et l'algorithme de Tarjan pour trouver les CFC.
+ * Tâche 2 : Communautés orientées dans DBLP.
+ * On compte les paires (premier auteur -> co-auteur) en flux,
+ * puis on construit un graphe orienté filtré (>= 6 co-publications),
+ * on cherche les CFC avec Tarjan, et on calcule les diamètres.
  */
 public class Tache2 extends Tache {
 
-    // Clé: (idSource << 32) | idDest -> Valeur: nombre de co-publications
-    private Map<Long, Integer> compteurPaires; 
+    // Compteur de paires ordonnées. Clé : deux ids encodés dans un long, Valeur : nombre de co-publications
+    private Map<Long, Integer> compteurPaires;
     private GrapheOriente graphe;
 
     public Tache2(String fichierXml, String fichierDtd) {
@@ -23,25 +25,25 @@ public class Tache2 extends Tache {
         this.compteurPaires = new HashMap<>();
     }
 
+    /**
+     * Pour chaque publication, on incrémente le compteur (premier auteur -> chaque co-auteur).
+     * Les deux ids sont encodés dans un seul long pour servir de clé dans le HashMap.
+     */
     @Override
     protected void traiterAuteurs(List<String> auteurs) {
-        // Le premier auteur est la source (A -> B, A -> C)
         int idPremier = obtenirId(auteurs.get(0));
 
         for (int i = 1; i < auteurs.size(); i++) {
             int idAutre = obtenirId(auteurs.get(i));
-            
-            //Encoder les deux 'int' dans un seul 'long'
             long cle = ((long) idPremier << 32) | (idAutre & 0xFFFFFFFFL);
-            
             compteurPaires.put(cle, compteurPaires.getOrDefault(cle, 0) + 1);
         }
     }
 
     @Override
     protected void afficherProgression(long nbPubs) {
-        System.out.println("  " + nbPubs + " publications traitées... (" 
-            + nomVersId.size() + " auteurs, " 
+        System.out.println("  " + nbPubs + " publications traitées... ("
+            + nomVersId.size() + " auteurs, "
             + compteurPaires.size() + " paires uniques en RAM)");
     }
 
@@ -51,20 +53,18 @@ public class Tache2 extends Tache {
         long debut = System.currentTimeMillis();
 
         System.out.println("\nÉtape 1 : Comptage des paires en flux...");
-        parcourirPublications(); // Déclenche traiterAuteurs() et afficherProgression() en boucle
-        
+        parcourirPublications();
         System.out.println("  Bilan Étape 1 : " + compteurPaires.size() + " paires totales trouvées.");
 
         etape2_construireGraphe();
-        
         List<List<Integer>> sccs = etape3_trouverSCC();
-        
         etape4_ecrireResultats(sccs);
 
         long fin = System.currentTimeMillis();
         System.out.println("TÂCHE 2 TERMINÉE en " + (fin - debut) + " ms");
     }
 
+    /** Construit le graphe orienté en ne gardant que les arêtes avec >= 6 co-publications. */
     private void etape2_construireGraphe() {
         System.out.println("\nÉtape 2 : Construction du graphe filtré (poids >= 6)...");
         graphe = new GrapheOriente();
@@ -72,42 +72,36 @@ public class Tache2 extends Tache {
         for (Map.Entry<Long, Integer> entry : compteurPaires.entrySet()) {
             if (entry.getValue() >= 6) {
                 long cle = entry.getKey();
-                
-                // Opération inverse : Décoder le long en deux int
-                int src = (int) (cle >> 32);
-                int dst = (int) cle;
-
+                int src = (int) (cle >> 32);   // décoder l'id source
+                int dst = (int) cle;            // décoder l'id destination
                 graphe.ajouterArete(src, dst);
             }
         }
 
-        //Libérer la mémoire occupée par les millions de paires
-        compteurPaires = null; 
-        
+        compteurPaires = null; // libérer la mémoire
+
         System.out.println("  Graphe construit : " + graphe.getSommets().size() + " sommets conservés.");
     }
 
+    /** Trouve les composantes fortement connexes via Tarjan. */
     private List<List<Integer>> etape3_trouverSCC() {
         System.out.println("\nÉtape 3 : Recherche des CFC (Algorithme de Tarjan)...");
-        
-        // Tout le travail complexe est encapsulé dans GrapheOriente !
         List<List<Integer>> sccs = graphe.obtenirCFC();
-        
         System.out.println("  " + sccs.size() + " communautés fortement connexes (CFC) trouvées.");
         return sccs;
     }
 
+    /** Écrit l'histogramme des tailles et le top 10 avec diamètres et noms des membres. */
     private void etape4_ecrireResultats(List<List<Integer>> sccs) throws IOException {
         System.out.println("\nÉtape 4 : Calcul des diamètres et écriture des résultats...");
         Files.createDirectories(Paths.get("output"));
 
         String horodatage = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-    
         String nomHisto = "output/tache2_histogram_" + horodatage + ".csv";
         String nomTop10 = "output/tache2_top10_" + horodatage + ".txt";
-        
-        //histogramme
-        Map<Integer, Integer> histogramme = new TreeMap<>(); 
+
+        // Histogramme : taille -> nombre de CFC de cette taille
+        Map<Integer, Integer> histogramme = new TreeMap<>();
         for (List<Integer> scc : sccs) {
             int t = scc.size();
             histogramme.put(t, histogramme.getOrDefault(t, 0) + 1);
@@ -119,16 +113,15 @@ public class Tache2 extends Tache {
                 pw1.println(entry.getKey() + "," + entry.getValue());
             }
         }
-        System.out.println("  Histogramme ->" + nomHisto);
+        System.out.println("  Histogramme -> " + nomHisto);
 
-        //Top 10 des plus grandes communautés
+        // Top 10 : taille, diamètre et liste des membres pour chaque CFC
         int nbTop = Math.min(10, sccs.size());
         try (PrintWriter pw2 = new PrintWriter(new FileWriter(nomTop10))) {
             for (int i = 0; i < nbTop; i++) {
                 List<Integer> scc = sccs.get(i);
                 System.out.print("  Calcul du diamètre pour la CFC " + (i + 1) + " (taille " + scc.size() + ")... ");
-                
-                // Le calcul du BFS est lui aussi encapsulé proprement
+
                 int diametre = graphe.calculerDiametre(scc);
                 System.out.println("-> Diamètre = " + diametre);
 
@@ -136,14 +129,12 @@ public class Tache2 extends Tache {
                 pw2.println("Taille : " + scc.size());
                 pw2.println("Diamètre : " + diametre);
                 pw2.println("Membres :");
-                
-                // Utilisation de la liste idVersNom de la superclasse pour retrouver les textes
                 for (int id : scc) {
-                    pw2.println("  - " + idVersNom.get(id)); 
+                    pw2.println("  - " + idVersNom.get(id));
                 }
                 pw2.println();
             }
         }
-        System.out.println("  Top 10 ->" + nomTop10);
+        System.out.println("  Top 10 -> " + nomTop10);
     }
 }

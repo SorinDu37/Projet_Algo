@@ -1,85 +1,82 @@
 package dblp.structures;
 
-import java.util.HashSet;
-import java.util.Set;
-
-public class UF {
 /**
- * Structure Union-Find comme vue au début du cours d'Algorithmique 2. 
- * Celle-ci utilisera la compression de chemins et l'union rapide pondérée afin d'optimiser au mieux les opérations.
- * Une classe d'équivalence est ici commentée comme "communauté".
+ * Structure Union-Find (Disjoint Set Union) avec compression de chemins
+ * et union pondérée par taille. Utilisée dans la Tâche 1 pour maintenir
+ * les communautés de co-publication de manière online.
  */
-    private int[] parent; //chaque index pointera vers son parent
-    private int[] size; //stocke la taille des communautés
-    private int count;  //Nombre total de communautés
+public class UF {
 
-    public UF (int n) {
-        count = n; 
-        parent = new int[n]; 
+    private int[] parent; // parent[i] = parent du sommet i dans l'arbre
+    private int[] size;   // size[i] = taille de la communauté si i est racine
+    private int count;    // nombre total de communautés distinctes
+
+    /**
+     * Initialise n éléments, chacun dans sa propre communauté.
+     */
+    public UF(int n) {
+        count = n;
+        parent = new int[n];
         size = new int[n];
 
         for (int i = 0; i < n; i++) {
-            parent[i] = i; //chacun est son propre parent
-            size[i] = 1; //chaque communauté est de taille 1
+            parent[i] = i;
+            size[i] = 1;
         }
     }
+
     /**
-     * Unit la communauté de p et de q, en choississant la plus petite pour la rattacher à la plus grande.
-     * @param p : élément de p
-     * @param q : élément de q
+     * Fusionne les communautés de p et q (union pondérée : la plus petite
+     * est rattachée à la plus grande pour garder les arbres équilibrés).
+     * @return true si une fusion a eu lieu, false si p et q étaient déjà ensemble
      */
     public boolean union(int p, int q) {
-        int i = find(p); //communauté de p
-        int j = find(q); //communauté de q
-        if (i == j){ //si appartiennent déjà à la même
+        int i = find(p);
+        int j = find(q);
+        if (i == j) {
             return false;
         }
-        
-        //faire pointer la communauté la plus petite à la plus grande
+
         if (size[i] < size[j]) {
-            parent[i] = j; 
-            size[j] += size[i]; //incrémenter la taille de la communauté
-        }
-        else {
-            parent[j] =i;
+            parent[i] = j;
+            size[j] += size[i];
+        } else {
+            parent[j] = i;
             size[i] += size[j];
         }
-        count--; //nombre de communautés baisse du coup
+        count--;
         return true;
     }
 
     /**
-     * Retrouve la communauté de p
-     * @param p : élément p
-     * @return : la communauté correspondant à p
+     * Trouve la racine de la communauté de p, avec compression de chemin :
+     * tous les nœuds traversés sont directement rattachés à la racine.
      */
     public int find(int p) {
         int root = p;
         while (root != parent[root]) {
-            root = parent[root]; //on remonte
-        } //ici donc root contient le parent
-        while (p != root) { //processus de compression
-            int newp = parent[p]; //on récupère le parent de p actuel
-            parent[p] = root; // on dit que root devient le parent de p
-            p = newp; //on remonte
+            root = parent[root];
+        }
+        // Compression : rattacher chaque nœud du chemin directement à la racine
+        while (p != root) {
+            int next = parent[p];
+            parent[p] = root;
+            p = next;
         }
         return root;
     }
 
-    /**
-     * Teste si p appartient à la même classe d'équivalence (communauté) que q.
-     * @param p : Premier élément
-     * @param q : Deuxième élément
-     * @return : true si appartient à la même classe d'équivalence, false sinon.
-     */
-    public boolean connected (int p, int q) {
+    /** Vérifie si p et q sont dans la même communauté. */
+    public boolean connected(int p, int q) {
         return find(p) == find(q);
     }
 
+    /** Retourne la taille de la communauté dont root est la racine. */
     public int getSize(int root) {
         return size[root];
     }
 
+    /** Retourne le nombre total de communautés distinctes. */
     public int count() {
         return count;
     }
