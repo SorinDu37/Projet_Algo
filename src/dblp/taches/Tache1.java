@@ -91,9 +91,11 @@ public class Tache1 extends Tache {
         String nomComplet = "output/" + nomFichierSortie + "_" + horodatage + ".csv";
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(nomComplet))) {
-            writer.println("TailleCommunaute,NombreDeCommunautes");
+            writer.println("Nombre_Total_Communautes");
+            writer.println(getNombreVraiesCommunautes());
+            writer.println("Nombre_de_Communautes,Taille_de_Communautes");
             for (Map.Entry<Integer, Integer> entry : histogramme.entrySet()) {
-                writer.println(entry.getKey() + "," + entry.getValue());
+                writer.println(entry.getValue() + " , " + entry.getKey());
             }
         }
         System.out.println("  Histogramme sauvegardé dans : " + nomComplet);
