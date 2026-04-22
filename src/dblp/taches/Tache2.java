@@ -4,6 +4,8 @@ import dblp.core.Tache;
 import dblp.structures.GrapheOriente;
 import java.io.*;
 import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -99,6 +101,11 @@ public class Tache2 extends Tache {
         System.out.println("\nÉtape 4 : Calcul des diamètres et écriture des résultats...");
         Files.createDirectories(Paths.get("output"));
 
+        String horodatage = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+    
+        String nomHisto = "output/tache2_histogram_" + horodatage + ".csv";
+        String nomTop10 = "output/tache2_top10_" + horodatage + ".txt";
+        
         //histogramme
         Map<Integer, Integer> histogramme = new TreeMap<>(); 
         for (List<Integer> scc : sccs) {
@@ -106,17 +113,17 @@ public class Tache2 extends Tache {
             histogramme.put(t, histogramme.getOrDefault(t, 0) + 1);
         }
 
-        try (PrintWriter pw1 = new PrintWriter(new FileWriter("output/tache2_histogram.csv"))) {
+        try (PrintWriter pw1 = new PrintWriter(new FileWriter(nomHisto))) {
             pw1.println("taille_communaute,nombre_communautes");
             for (Map.Entry<Integer, Integer> entry : histogramme.entrySet()) {
                 pw1.println(entry.getKey() + "," + entry.getValue());
             }
         }
-        System.out.println("  Histogramme -> output/tache2_histogram.csv");
+        System.out.println("  Histogramme ->" + nomHisto);
 
         //Top 10 des plus grandes communautés
         int nbTop = Math.min(10, sccs.size());
-        try (PrintWriter pw2 = new PrintWriter(new FileWriter("output/tache2_top10.txt"))) {
+        try (PrintWriter pw2 = new PrintWriter(new FileWriter(nomTop10))) {
             for (int i = 0; i < nbTop; i++) {
                 List<Integer> scc = sccs.get(i);
                 System.out.print("  Calcul du diamètre pour la CFC " + (i + 1) + " (taille " + scc.size() + ")... ");
@@ -137,6 +144,6 @@ public class Tache2 extends Tache {
                 pw2.println();
             }
         }
-        System.out.println("  Top 10 -> output/tache2_top10.txt");
+        System.out.println("  Top 10 ->" + nomTop10);
     }
 }

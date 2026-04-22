@@ -4,6 +4,8 @@ import dblp.core.Tache;
 import dblp.structures.UF;
 import java.io.*;
 import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Tache1 extends Tache {
@@ -62,7 +64,7 @@ public class Tache1 extends Tache {
         System.out.println("Étape 1 : Regroupement des auteurs en flux (Union-Find)...");
         parcourirPublications(); 
 
-        genererHistogramme("output/tache1_histogram.csv");
+        genererHistogramme("tache1_histogram");
 
         long fin = System.currentTimeMillis();
         System.out.println("TÂCHE 1 TERMINÉE en " + (fin - debut) + " ms");
@@ -85,12 +87,15 @@ public class Tache1 extends Tache {
             histogramme.put(taille, histogramme.getOrDefault(taille, 0) + 1);
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(nomFichierSortie))) {
+        String horodatage = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String nomComplet = "output/" + nomFichierSortie + "_" + horodatage + ".csv";
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(nomComplet))) {
             writer.println("TailleCommunaute,NombreDeCommunautes");
             for (Map.Entry<Integer, Integer> entry : histogramme.entrySet()) {
                 writer.println(entry.getKey() + "," + entry.getValue());
             }
         }
-        System.out.println("  Histogramme sauvegardé dans : " + nomFichierSortie);
+        System.out.println("  Histogramme sauvegardé dans : " + nomComplet);
     } 
 }
