@@ -1,0 +1,13 @@
+# Ignorer les fichiers compilés
+bin/
+
+# Ignorer les données volumineuses
+lib/*.xml.gz
+lib/*.xml
+lib/*.dtd
+
+# Ignorer les résultats générés
+output/
+
+# Ignorer les dossiers de configuration de VS Code
+.vscode/

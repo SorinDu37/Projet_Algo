@@ -1,3 +1,5 @@
+package dblp.structures;
+
 import java.util.HashSet;
 import java.util.Set;
 

@@ -1,14 +1,15 @@
-import org.xml.sax.*;
-import org.xml.sax.ext.EntityResolver2;
-import org.xml.sax.helpers.DefaultHandler;
+package dblp.core;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.zip.GZIPInputStream;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.*;
+import org.xml.sax.ext.EntityResolver2;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Generator-style DBLP parser.
