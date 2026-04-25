@@ -65,3 +65,23 @@ pip install requests matplotlib
 # Run analysis (automatically detects the latest output file)
 python3 bonus.py
 ```
+
+### 3. Bonus Task (Python)
+The bonus script requires Python 3.x and the `requests` and `matplotlib` libraries.
+
+```bash
+# Install dependencies
+pip install requests matplotlib
+
+# Run analysis (automatically detects the latest output file)
+python3 bonus.py
+```
+
+## Output Results
+
+All results are exported to the `output/` directory:
+* **tache1_histogram.csv**: Distribution of undirected community sizes.
+* **tache2_histogram.csv**: Distribution of SCC sizes.
+* **tache2_top10.txt**: Detailed breakdown of the 10 largest directed communities.
+* **bonus_pays.csv**: Matrix of country counts per community.
+* **bonus_pays.png**: Stacked bar chart showing the geographical proportions of the top communities.
