@@ -74,7 +74,7 @@ The bonus script requires Python 3.x and the `requests` and `matplotlib` librari
 pip install requests matplotlib
 
 # Run analysis (automatically detects the latest output file)
-python3 bonus.py
+python3 bonus.py output/name_of_file.txt
 ```
 
 ## Output Results
